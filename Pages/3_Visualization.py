@@ -13,4 +13,5 @@ else:
     fig, ax = plt.subplots()
     df[["Protein", "Carbs", "Fat"]].sum().plot(kind="pie", autopct="%1.1f%%", ax=ax)
     ax.set_ylabel("")
+    
     st.pyplot(fig)
