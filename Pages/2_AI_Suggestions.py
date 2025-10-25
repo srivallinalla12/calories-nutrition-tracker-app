@@ -1,6 +1,6 @@
 import pandas as pd
 
-# Load your meal dataset
+# Load the sample dataset
 meals = pd.read_csv("/Users/sulavbista/Desktop/Fall 2025/CIS 485 /calories-nutrition-tracker-app/data/meals.csv")
 
 print("****** Weight Loss | High Protein | Balanced Diet ******")
