@@ -1,2 +1,33 @@
-Meal,Calories,Protein,Carbs,Fat
-Apple,90,2,5,2
+Meal,Calories,Protein,Carbs,Fat,Category
+Oatmeal with Banana,300,8,54,5,Breakfast
+Scrambled Eggs with Toast,350,18,30,15,Breakfast
+Greek Yogurt with Berries,200,12,25,4,Breakfast
+Avocado Toast,320,10,30,15,Breakfast
+Smoothie with Spinach and Protein Powder,280,22,35,6,Breakfast
+Pancakes with Honey,400,10,60,10,Breakfast
+Boiled Eggs and Fruit,250,13,20,10,Breakfast
+Grilled Chicken Salad,400,35,20,10,Lunch
+Veggie Wrap,350,12,45,8,Lunch
+Brown Rice with Lentils,450,20,70,6,Lunch
+Tuna Sandwich,380,30,40,9,Lunch
+Quinoa Bowl with Chickpeas,420,18,55,10,Lunch
+Turkey and Cheese Sandwich,400,28,35,12,Lunch
+Veggie Burrito Bowl,470,22,65,14,Lunch
+Baked Salmon with Quinoa,500,40,40,15,Dinner
+Tofu Stir Fry with Vegetables,420,22,50,12,Dinner
+Pasta with Marinara Sauce,480,18,75,8,Dinner
+Grilled Shrimp with Brown Rice,460,35,45,10,Dinner
+Chicken Curry with Rice,550,38,60,18,Dinner
+Beef Stir Fry with Broccoli,520,40,35,20,Dinner
+Grilled Veggie Pasta,430,16,65,9,Dinner
+Buddha Bowl with Tofu,440,24,60,12,Dinner
+Apple with Peanut Butter,250,8,30,12,Snack
+Protein Shake,200,20,10,3,Snack
+Mixed Nuts,300,10,12,25,Snack
+Hummus with Carrots,180,6,20,8,Snack
+Granola Bar,220,5,30,9,Snack
+Cottage Cheese with Pineapple,210,16,18,5,Snack
+Popcorn (Air-popped),150,4,25,4,Snack
+Dark Chocolate Squares,180,2,18,12,Snack
+
+
