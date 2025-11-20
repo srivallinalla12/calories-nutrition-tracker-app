@@ -1,33 +1,53 @@
+# 1_Food_Logging.py
+
 import streamlit as st
 import pandas as pd
+import os
 from datetime import datetime, date
 
-st.title("🍽️ Food Logging (Friendly USDA Dataset)")
+# ---------------------------
+# Paths
+# ---------------------------
+DATA_DIR = "data"
+MEALS_FILE = os.path.join(DATA_DIR, "meals.csv")
+USDA_FILE = "USDA.csv"
 
-# --- Load USDA dataset ---
-meals_file = "USDA.csv"
-meals_df = pd.read_csv(meals_file)
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-# Rename columns for consistency
-meals_df = meals_df.rename(columns={
-    "Description": "Meal",
-    "Carbohydrate": "Carbs"
-})
+expected_cols = ["DateTime", "Date", "MealType", "Meal",
+                 "Servings", "Calories", "Protein", "Carbs", "Fat"]
 
-# Convert numeric columns
+# Ensure meals file exists
+if not os.path.exists(MEALS_FILE) or os.stat(MEALS_FILE).st_size == 0:
+    pd.DataFrame(columns=expected_cols).to_csv(MEALS_FILE, index=False)
+
+# ---------------------------
+# Load USDA
+# ---------------------------
+if not os.path.exists(USDA_FILE):
+    st.error("Missing USDA.csv. Please place it in the main folder.")
+    st.stop()
+
+meals_df = pd.read_csv(USDA_FILE)
+meals_df = meals_df.rename(columns={"Description": "Meal", "Carbohydrate": "Carbs"})
 for col in ["Calories", "Protein", "Carbs", "Fat"]:
     meals_df[col] = pd.to_numeric(meals_df[col], errors="coerce")
 
-# --- Create friendly display names ---
+# ---------------------------
+# Friendly Meal Name Logic
+# ---------------------------
 def get_display_name(desc):
-    desc = desc.lower()
+    if pd.isna(desc):
+        return "Unknown"
+    desc = str(desc).lower()
     if "rice" in desc:
         if "brown" in desc:
             return "Brown Rice"
         elif "wild" in desc:
             return "Wild Rice"
         return "White Rice"
-    if "chick" in desc or "chicken" in desc:
+    if "chick" in desc:
         return "Chicken"
     if "tomato" in desc:
         return "Tomato"
@@ -38,13 +58,12 @@ def get_display_name(desc):
     if "soup" in desc:
         if "tomato" in desc:
             return "Tomato Soup"
-        elif "chick" in desc:
+        if "chick" in desc:
             return "Chicken Soup"
-    return desc.split(",")[0].title()
+    return str(desc).split(",")[0].title()
 
 meals_df["DisplayMeal"] = meals_df["Meal"].apply(get_display_name)
 
-# Group by friendly name and average macros
 friendly_df = meals_df.groupby("DisplayMeal").agg({
     "Calories": "mean",
     "Protein": "mean",
@@ -52,29 +71,60 @@ friendly_df = meals_df.groupby("DisplayMeal").agg({
     "Fat": "mean"
 }).reset_index()
 
-# --- Session storage ---
-if "today_meals" not in st.session_state:
-    st.session_state.today_meals = []
+# ---------------------------
+# Helper functions
+# ---------------------------
+def read_meals_file():
+    df = pd.read_csv(MEALS_FILE)
+    for col in expected_cols:
+        if col not in df.columns:
+            df[col] = pd.NA
+    for col in ["Servings", "Calories", "Protein", "Carbs", "Fat"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    return df[expected_cols]
 
-# --- Meal Input Section ---
+def write_meals_file(df):
+    df.to_csv(MEALS_FILE, index=False)
+
+# ---------------------------
+# Session State
+# ---------------------------
+if "meals_by_date" not in st.session_state:
+    st.session_state.meals_by_date = {}
+
+# ---------------------------
+# Page Title & Date
+# ---------------------------
+st.title("🍽️ Food Logging (Friendly USDA Dataset)")
+selected_date = st.date_input("Select a date to view/edit meals", value=date.today())
+selected_date_str = selected_date.strftime("%Y-%m-%d")
+
+# Load meals for selected date
+all_meals_df = read_meals_file()
+if selected_date_str not in st.session_state.meals_by_date:
+    st.session_state.meals_by_date[selected_date_str] = all_meals_df[all_meals_df["Date"] == selected_date_str].to_dict("records")
+
+today_meals = st.session_state.meals_by_date[selected_date_str]
+
+# ---------------------------
+# Meal Input
+# ---------------------------
 st.subheader("Add a Meal")
-
-meal_input = st.text_input("Search Meal", placeholder="Start typing to search...")
-
-# Filter meals for autocomplete
-matched_meals = friendly_df[friendly_df["DisplayMeal"].str.contains(meal_input, case=False, na=False)]
-
+meal_input = st.text_input("Search Meal", placeholder="Type to search...")
 selected_meal = None
-if not matched_meals.empty and meal_input != "":
-    option = st.selectbox("Select a Meal", matched_meals["DisplayMeal"].tolist())
-    if option:
-        selected_meal = friendly_df[friendly_df["DisplayMeal"] == option].iloc[0]
+matched_meals = pd.DataFrame()
 
-# Meal type and servings
+if meal_input.strip():
+    matched_meals = friendly_df[friendly_df["DisplayMeal"].str.contains(meal_input, case=False, na=False)]
+    if not matched_meals.empty:
+        option = st.selectbox("Select Meal", matched_meals["DisplayMeal"].tolist())
+        if option:
+            selected_meal = matched_meals[matched_meals["DisplayMeal"] == option].iloc[0]
+
 meal_type = st.selectbox("Meal Type", ["Breakfast", "Lunch", "Dinner", "Snack"])
-servings = st.number_input("Number of servings", min_value=0.1, value=1.0, step=0.1)
+servings = st.number_input("Servings", min_value=0.1, value=1.0, step=0.1)
 
-# Autofill macros if meal selected
+# Autofill macros
 if selected_meal is not None:
     calories = selected_meal["Calories"] * servings
     protein = selected_meal["Protein"] * servings
@@ -82,76 +132,103 @@ if selected_meal is not None:
     fat = selected_meal["Fat"] * servings
     st.info(f"Calories: {calories:.1f} kcal | Protein: {protein:.1f} g | Carbs: {carbs:.1f} g | Fat: {fat:.1f} g")
 else:
-    calories = st.number_input("Calories (kcal)", min_value=0)
-    protein = st.number_input("Protein (g)", min_value=0)
-    carbs = st.number_input("Carbs (g)", min_value=0)
-    fat = st.number_input("Fat (g)", min_value=0)
+    calories = st.number_input("Calories", min_value=0.0, value=0.0)
+    protein = st.number_input("Protein", min_value=0.0, value=0.0)
+    carbs = st.number_input("Carbs", min_value=0.0, value=0.0)
+    fat = st.number_input("Fat", min_value=0.0, value=0.0)
 
-# Add meal to session
+# ---------------------------
+# Add Meal Button
+# ---------------------------
 if st.button("➕ Add Meal"):
-    if meal_input.strip() == "":
-        st.warning("Please enter a meal name.")
+    if selected_meal is None:
+        st.warning("Please select a meal from the list.")
     else:
-        st.session_state.today_meals.append({
-            "DateTime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        row = {
+            "DateTime": timestamp,
+            "Date": selected_date_str,
             "MealType": meal_type,
-            "Meal": meal_input.strip(),
-            "Servings": servings,
-            "Calories": calories,
-            "Protein": protein,
-            "Carbs": carbs,
-            "Fat": fat
-        })
-        st.success(f"{meal_type} - {meal_input} ({servings} servings) added!")
+            "Meal": selected_meal["DisplayMeal"],
+            "Servings": float(servings),
+            "Calories": float(calories),
+            "Protein": float(protein),
+            "Carbs": float(carbs),
+            "Fat": float(fat)
+        }
 
-# --- Display today's meals grouped by type ---
-if st.session_state.today_meals:
+        # Append only once to session state
+        st.session_state.meals_by_date.setdefault(selected_date_str, []).append(row)
+
+        # Update CSV
+        all_meals_df = read_meals_file()
+        all_meals_df = pd.concat([all_meals_df, pd.DataFrame([row])], ignore_index=True)
+        write_meals_file(all_meals_df)
+
+        st.success(f"{meal_type} - {selected_meal['DisplayMeal']} added!")
+
+# ---------------------------
+# Display Meals (Inline Edit/Delete)
+# ---------------------------
+if today_meals:
+    st.subheader(f"📋 Meals Logged on {selected_date_str}")
     st.markdown("---")
-    st.subheader(f"📋 Meals Logged Today ({date.today()})")
-    
-    meal_types_order = ["Breakfast", "Lunch", "Dinner", "Snack"]
-    
-    for m_type in meal_types_order:
-        meals_of_type = [m for m in st.session_state.today_meals if m["MealType"] == m_type]
-        if meals_of_type:
+    order = ["Breakfast", "Lunch", "Dinner", "Snack"]
+
+    for m_type in order:
+        meals = [m for m in today_meals if m["MealType"] == m_type]
+        if meals:
             st.markdown(f"### {m_type}")
-            for i, row in enumerate(meals_of_type):
-                col1, col2, col3, col4, col5, col6 = st.columns([2, 1, 1, 1, 1, 1])
-                col1.markdown(f"**{row['Meal']}**")
-                col2.write(f"{row['Servings']}")
-                col3.write(f"{row['Calories']:.1f}")
-                col4.write(f"{row['Protein']:.1f}")
-                col5.write(f"{row['Carbs']:.1f}")
-                
-                edit_col, delete_col = st.columns([1, 1])
-                
-                # Edit
-                if edit_col.button("✏️", key=f"edit_{m_type}_{i}"):
-                    with st.form(key=f"edit_form_{m_type}_{i}"):
-                        meal_name_edit = st.text_input("Meal Name", value=row["Meal"])
-                        servings_edit = st.number_input("Number of servings", min_value=0.1, value=row["Servings"], step=0.1)
-                        if st.form_submit_button("💾 Save Changes"):
-                            idx_in_session = st.session_state.today_meals.index(row)
-                            st.session_state.today_meals[idx_in_session]["Meal"] = meal_name_edit
-                            st.session_state.today_meals[idx_in_session]["Servings"] = servings_edit
-                            st.session_state.today_meals[idx_in_session]["Calories"] = row["Calories"] / row["Servings"] * servings_edit
-                            st.session_state.today_meals[idx_in_session]["Protein"] = row["Protein"] / row["Servings"] * servings_edit
-                            st.session_state.today_meals[idx_in_session]["Carbs"] = row["Carbs"] / row["Servings"] * servings_edit
-                            st.session_state.today_meals[idx_in_session]["Fat"] = row["Fat"] / row["Servings"] * servings_edit
-                            st.success("Changes saved!")
-                
-                # Delete
-                if delete_col.button("🗑️", key=f"del_{m_type}_{i}"):
-                    idx_in_session = st.session_state.today_meals.index(row)
-                    st.session_state.today_meals.pop(idx_in_session)
-                    st.success(f"Deleted {row['Meal']}")
+            for idx, row in enumerate(meals):
+                edit_key = f"edit_{m_type}_{idx}_{selected_date_str}"
+                save_key = f"save_{m_type}_{idx}_{selected_date_str}"
+                delete_key = f"delete_{m_type}_{idx}_{selected_date_str}"
 
-            st.markdown("---")  # line between meal types
+                if st.session_state.get(edit_key, False):
+                    col1, col2, col3, col4, col5, col6, col7 = st.columns([3,1,1,1,1,1,1])
+                    col1.write(row["Meal"])
+                    servings = col2.number_input("Servings", min_value=0.1, value=row["Servings"], step=0.1, key=f"servings_{idx}_{selected_date_str}")
+                    calories = col3.number_input("Calories", min_value=0.0, value=row["Calories"], step=0.1, key=f"cal_{idx}_{selected_date_str}")
+                    protein = col4.number_input("Protein", min_value=0.0, value=row["Protein"], step=0.1, key=f"protein_{idx}_{selected_date_str}")
+                    carbs = col5.number_input("Carbs", min_value=0.0, value=row["Carbs"], step=0.1, key=f"carbs_{idx}_{selected_date_str}")
+                    fat = col6.number_input("Fat", min_value=0.0, value=row["Fat"], step=0.1, key=f"fat_{idx}_{selected_date_str}")
 
-    # --- Nutrient summary ---
-    st.markdown("### 🧮 Total Nutrients Today")
-    today_df = pd.DataFrame(st.session_state.today_meals)
-    st.write(f"Calories: {today_df['Calories'].sum():.1f} kcal")
-    st.write(f"Protein: {today_df['Protein'].sum():.1f} g")
-    st.write(f"Carbs: {today_df['Carbs'].sum():.1f} g")
-    st.write(f"Fat: {today_df['Fat'].sum():.1f} g")
+                    if col7.button("💾 Save", key=save_key):
+                        st.session_state.meals_by_date[selected_date_str][idx] = {
+                            "DateTime": row["DateTime"],
+                            "Date": selected_date_str,
+                            "MealType": m_type,
+                            "Meal": row["Meal"],
+                            "Servings": servings,
+                            "Calories": calories,
+                            "Protein": protein,
+                            "Carbs": carbs,
+                            "Fat": fat
+                        }
+                        updated_df = pd.DataFrame(st.session_state.meals_by_date[selected_date_str])
+                        all_meals_df = read_meals_file()
+                        all_meals_df = all_meals_df[all_meals_df["Date"] != selected_date_str]
+                        all_meals_df = pd.concat([all_meals_df, updated_df], ignore_index=True)
+                        write_meals_file(all_meals_df)
+                        st.session_state[edit_key] = False
+                        st.experimental_rerun()
+                else:
+                    col1, col2, col3, col4, col5, col6, col7 = st.columns([3,1,1,1,1,1,1])
+                    col1.markdown(f"**{row['Meal']}**")
+                    col2.write(row["Servings"])
+                    col3.write(f"{row['Calories']:.1f}")
+                    col4.write(f"{row['Protein']:.1f}")
+                    col5.write(f"{row['Carbs']:.1f}")
+                    col6.write(f"{row['Fat']:.1f}")
+
+                    if col7.button("✏️ Edit", key=edit_key):
+                        st.session_state[edit_key] = True
+                        st.experimental_rerun()
+                    if col7.button("🗑️ Delete", key=delete_key):
+                        st.session_state.meals_by_date[selected_date_str].pop(idx)
+                        updated_df = pd.DataFrame(st.session_state.meals_by_date[selected_date_str])
+                        all_meals_df = read_meals_file()
+                        all_meals_df = all_meals_df[all_meals_df["Date"] != selected_date_str]
+                        all_meals_df = pd.concat([all_meals_df, updated_df], ignore_index=True)
+                        write_meals_file(all_meals_df)
+                        st.experimental_rerun()
