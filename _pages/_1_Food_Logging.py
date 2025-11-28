@@ -1,10 +1,10 @@
-# _1_Food_Logging.py
 import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime, date
 
 def food_logging_page():
+
     # ---------------------------
     # SESSION CHECK
     # ---------------------------
@@ -12,13 +12,21 @@ def food_logging_page():
         st.warning("Please log in first to access this page.")
         return
 
+    username = st.session_state["user"]  # <-- CURRENT LOGGED USER
+
     st.title("📊 Food Log")
 
     # ---------------------------
-    # Paths
+    # USER-SPECIFIC PATHS
     # ---------------------------
     DATA_DIR = "data"
-    MEALS_FILE = os.path.join(DATA_DIR, "meals.csv")
+
+    # Demo user keeps the shared meals.csv
+    if username == "demo":
+        MEALS_FILE = os.path.join(DATA_DIR, "meals.csv")
+    else:
+        MEALS_FILE = os.path.join(DATA_DIR, f"{username}_meals.csv")
+
     USDA_FILE = "USDA.csv"
 
     if not os.path.exists(DATA_DIR):
@@ -27,7 +35,7 @@ def food_logging_page():
     expected_cols = ["DateTime", "Date", "MealType", "Meal",
                      "Servings", "Calories", "Protein", "Carbs", "Fat"]
 
-    # Ensure meals file exists
+    # Ensure user meals file exists
     if not os.path.exists(MEALS_FILE) or os.stat(MEALS_FILE).st_size == 0:
         pd.DataFrame(columns=expected_cols).to_csv(MEALS_FILE, index=False)
 
@@ -43,9 +51,7 @@ def food_logging_page():
     for col in ["Calories", "Protein", "Carbs", "Fat"]:
         meals_df[col] = pd.to_numeric(meals_df[col], errors="coerce")
 
-    # ---------------------------
-    # Friendly Meal Name Logic
-    # ---------------------------
+    # Meal Name Cleanup
     def get_display_name(desc):
         if pd.isna(desc):
             return "Unknown"
@@ -81,7 +87,7 @@ def food_logging_page():
     }).reset_index()
 
     # ---------------------------
-    # Helper functions
+    # Helper functions NOW use user-specific files
     # ---------------------------
     def read_meals_file():
         df = pd.read_csv(MEALS_FILE)
@@ -98,6 +104,7 @@ def food_logging_page():
     # ---------------------------
     # Session State
     # ---------------------------
+    username = st.session_state["user"]
     if "meals_by_date" not in st.session_state:
         st.session_state.meals_by_date = {}
 
@@ -108,13 +115,19 @@ def food_logging_page():
     selected_date = st.date_input("Select a date to view/edit meals", value=date.today())
     selected_date_str = selected_date.strftime("%Y-%m-%d")
 
+    # Load meals
+    # Ensure each user has their own namespace
+    if username not in st.session_state.meals_by_date:
+        st.session_state.meals_by_date[username] = {}
+
     # Load meals for selected date
     all_meals_df = read_meals_file()
-    if selected_date_str not in st.session_state.meals_by_date:
-        st.session_state.meals_by_date[selected_date_str] = all_meals_df[all_meals_df["Date"] == selected_date_str].to_dict("records")
+    user_meals_by_date = st.session_state.meals_by_date[username]
 
-    today_meals = st.session_state.meals_by_date[selected_date_str]
+    if selected_date_str not in user_meals_by_date:
+        user_meals_by_date[selected_date_str] = all_meals_df[all_meals_df["Date"] == selected_date_str].to_dict("records")
 
+    today_meals = user_meals_by_date[selected_date_str]
     # ---------------------------
     # Meal Input
     # ---------------------------
@@ -124,7 +137,8 @@ def food_logging_page():
     matched_meals = pd.DataFrame()
 
     if meal_input.strip():
-        matched_meals = friendly_df[friendly_df["DisplayMeal"].str.contains(meal_input, case=False, na=False)]
+        matched_meals = friendly_df[friendly_df["DisplayMeal"]
+                                    .str.contains(meal_input, case=False, na=False)]
         if not matched_meals.empty:
             option = st.selectbox("Select Meal", matched_meals["DisplayMeal"].tolist())
             if option:
@@ -166,10 +180,10 @@ def food_logging_page():
                 "Fat": float(fat)
             }
 
-            # Append only once to session state
+            # Add to session
             st.session_state.meals_by_date.setdefault(selected_date_str, []).append(row)
 
-            # Update CSV
+            # Write to user-specific CSV
             all_meals_df = read_meals_file()
             all_meals_df = pd.concat([all_meals_df, pd.DataFrame([row])], ignore_index=True)
             write_meals_file(all_meals_df)
@@ -177,7 +191,7 @@ def food_logging_page():
             st.success(f"{meal_type} - {selected_meal['DisplayMeal']} added!")
 
     # ---------------------------
-    # Display Meals (Inline Edit/Delete)
+    # Display Meals (Edit/Delete)
     # ---------------------------
     if today_meals:
         st.subheader(f"📋 Meals Logged on {selected_date_str}")
@@ -207,7 +221,7 @@ def food_logging_page():
                                 "DateTime": row["DateTime"],
                                 "Date": selected_date_str,
                                 "MealType": m_type,
-                                "Meal": row["Meal"],
+                                "Meal": row["Meal"], 
                                 "Servings": servings,
                                 "Calories": calories,
                                 "Protein": protein,
@@ -221,6 +235,7 @@ def food_logging_page():
                             write_meals_file(all_meals_df)
                             st.session_state[edit_key] = False
                             st.experimental_rerun()
+
                     else:
                         col1, col2, col3, col4, col5, col6, col7 = st.columns([3,1,1,1,1,1,1])
                         col1.markdown(f"**{row['Meal']}**")
@@ -233,6 +248,7 @@ def food_logging_page():
                         if col7.button("✏️ Edit", key=edit_key):
                             st.session_state[edit_key] = True
                             st.experimental_rerun()
+
                         if col7.button("🗑️ Delete", key=delete_key):
                             st.session_state.meals_by_date[selected_date_str].pop(idx)
                             updated_df = pd.DataFrame(st.session_state.meals_by_date[selected_date_str])

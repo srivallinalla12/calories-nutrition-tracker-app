@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime, timedelta
+import os
 
 def visualization_page():
     # ---------------------------
@@ -13,17 +14,58 @@ def visualization_page():
         st.warning("Please log in first to access this page.")
         return
 
+    username = st.session_state["user"]
+
+    # ---------------------------
+    # CORRECT FILE DETECTION
+    # ---------------------------
+    if username == "demo":
+        meals_file = "data/meals.csv"  # demo user file
+    else:
+        meals_file = f"data/{username}_meals.csv"  # new user file
+
     st.title("📊 Nutrition Visualization (Protein, Carbs, Fat Focus)")
 
     # ---------------------------
-    # Load Meals
+    # Load Meals File
     # ---------------------------
-    MEALS_FILE = "data/meals.csv"
+    if not os.path.exists(meals_file) or os.stat(meals_file).st_size == 0:
+        st.warning("No saved logs found yet. Please log meals first.")
+        return
+
     try:
-        df = pd.read_csv(MEALS_FILE)
-    except FileNotFoundError:
-        st.warning("No saved daily logs found yet. Log meals on the Food Logging page first.")
-        st.stop()
+        df = pd.read_csv(meals_file)
+    except:
+        st.error("Could not read your log file.")
+        return
+
+    # ---------------------------
+    # CHECK EMPTY DATAFRAME
+    # ---------------------------
+    if df.empty:
+        st.warning("No meal entries found yet. Please log meals first!")
+        return
+
+    # ---------------------------
+    # CHECK REQUIRED COLUMNS
+    # ---------------------------
+    required_cols = ["DateTime", "Date", "MealType", "Meal", "Servings", "Calories", "Protein", "Carbs", "Fat"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+
+    if missing_cols:
+        st.warning(f"Your log file is missing required columns: {', '.join(missing_cols)}. Please log meals again.")
+        return
+
+
+    # ---------------------------
+    # CLEAN NUMERIC COLUMNS
+    # ---------------------------
+    for col in ["Servings", "Calories", "Protein", "Carbs", "Fat"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+    # Continue with your visualization plots...
+    st.success("Meal data loaded successfully!")
+
 
     # Ensure datetime columns
     df["DateTime"] = pd.to_datetime(df["DateTime"])
@@ -64,34 +106,28 @@ def visualization_page():
     remaining_calories = max(calorie_goal - total_calories, 0)
 
     # ---------------------------------------------------------
-    # 🔥 CALORIES OVER TIME WITH RANGE SELECTOR 
+    # 🔥 CALORIES OVER TIME (RANGE SELECTOR)
     # ---------------------------------------------------------
     st.markdown("---")
     st.subheader("📆 Calories Over Time (Select Range)")
 
     range_option = st.selectbox(
         "Select Time Range:",
-        [ "Week", "Month", "Year", "Max"],
+        ["Week", "Month", "Year", "Max"],
         index=0
     )
 
     today = datetime.now().date()
 
-    # ---- RANGE FILTER ----
-    if range_option == "Day":
-        df_range = df[df["DateTime"].dt.date == today].copy()
-        if not df_range.empty:
-            df_range["TimeOnly"] = df_range["DateTime"].dt.strftime("%I:%M %p")
-    elif range_option == "Week":
+    if range_option == "Week":
         df_range = df[df["Date"] >= (today - timedelta(days=7))]
     elif range_option == "Month":
         df_range = df[df["Date"] >= (today - timedelta(days=30))]
     elif range_option == "Year":
         df_range = df[df["Date"] >= (today - timedelta(days=365))]
-    else:  # Max
+    else:
         df_range = df.copy()
 
-    # ---- CLEAN CALORIES OVER TIME GRAPH ----
     if df_range.empty:
         st.info("No data available for this time range.")
     else:
@@ -111,9 +147,7 @@ def visualization_page():
         ax.grid(alpha=0.3)
 
         import matplotlib.dates as mdates
-        if range_option == "Day":
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
-        elif range_option == "Week":
+        if range_option == "Week":
             ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %d"))
         elif range_option == "Month":
@@ -122,7 +156,7 @@ def visualization_page():
         elif range_option == "Year":
             ax.xaxis.set_major_locator(mdates.MonthLocator())
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
-        else:  # Max
+        else:
             ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
 
@@ -161,7 +195,7 @@ def visualization_page():
             st.info("No calories recorded for this day.")
 
     # ---------------------------
-    # Stacked Bar + Cumulative Line Side by Side
+    # Stacked Bar + Cumulative Line
     # ---------------------------
     st.subheader("📊 Macros by Meal Type & Cumulative Timeline")
     col3, col4 = st.columns(2)
@@ -196,7 +230,7 @@ def visualization_page():
         st.pyplot(fig4)
 
     # ---------------------------
-    # Horizontal Stacked Bar: Macro Proportions
+    # Horizontal Stacked Bar
     # ---------------------------
     st.subheader("📊 Macro Proportions")
     fig5, ax5 = plt.subplots(figsize=(5,1.2))
