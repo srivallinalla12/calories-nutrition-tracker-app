@@ -4,7 +4,6 @@ import os
 from datetime import datetime, date
 
 def food_logging_page():
-
     # ---------------------------
     # SESSION CHECK
     # ---------------------------
@@ -12,16 +11,12 @@ def food_logging_page():
         st.warning("Please log in first to access this page.")
         return
 
-    username = st.session_state["user"]  # <-- CURRENT LOGGED USER
-
-    st.title("📊 Food Log")
+    username = st.session_state["user"]
 
     # ---------------------------
     # USER-SPECIFIC PATHS
     # ---------------------------
     DATA_DIR = "data"
-
-    # Demo user keeps the shared meals.csv
     if username == "demo":
         MEALS_FILE = os.path.join(DATA_DIR, "meals.csv")
     else:
@@ -35,7 +30,7 @@ def food_logging_page():
     expected_cols = ["DateTime", "Date", "MealType", "Meal",
                      "Servings", "Calories", "Protein", "Carbs", "Fat"]
 
-    # Ensure user meals file exists
+    # Ensure meals file exists
     if not os.path.exists(MEALS_FILE) or os.stat(MEALS_FILE).st_size == 0:
         pd.DataFrame(columns=expected_cols).to_csv(MEALS_FILE, index=False)
 
@@ -87,7 +82,7 @@ def food_logging_page():
     }).reset_index()
 
     # ---------------------------
-    # Helper functions NOW use user-specific files
+    # Helper functions
     # ---------------------------
     def read_meals_file():
         df = pd.read_csv(MEALS_FILE)
@@ -104,30 +99,28 @@ def food_logging_page():
     # ---------------------------
     # Session State
     # ---------------------------
-    username = st.session_state["user"]
     if "meals_by_date" not in st.session_state:
         st.session_state.meals_by_date = {}
 
-    # ---------------------------
-    # Page Title & Date
-    # ---------------------------
     st.title("🍽️ Food Logging (Friendly USDA Dataset)")
     selected_date = st.date_input("Select a date to view/edit meals", value=date.today())
     selected_date_str = selected_date.strftime("%Y-%m-%d")
 
-    # Load meals
     # Ensure each user has their own namespace
     if username not in st.session_state.meals_by_date:
         st.session_state.meals_by_date[username] = {}
 
-    # Load meals for selected date
-    all_meals_df = read_meals_file()
     user_meals_by_date = st.session_state.meals_by_date[username]
+    all_meals_df = read_meals_file()
 
+    # ---------------------------
+    # Load meals for selected date from CSV if not in session-state
+    # ---------------------------
     if selected_date_str not in user_meals_by_date:
         user_meals_by_date[selected_date_str] = all_meals_df[all_meals_df["Date"] == selected_date_str].to_dict("records")
 
     today_meals = user_meals_by_date[selected_date_str]
+
     # ---------------------------
     # Meal Input
     # ---------------------------
@@ -181,14 +174,15 @@ def food_logging_page():
             }
 
             # Add to session
-            st.session_state.meals_by_date.setdefault(selected_date_str, []).append(row)
+            user_meals_by_date.setdefault(selected_date_str, []).append(row)
 
-            # Write to user-specific CSV
+            # Write to CSV
             all_meals_df = read_meals_file()
             all_meals_df = pd.concat([all_meals_df, pd.DataFrame([row])], ignore_index=True)
             write_meals_file(all_meals_df)
 
             st.success(f"{meal_type} - {selected_meal['DisplayMeal']} added!")
+            st.rerun()
 
     # ---------------------------
     # Display Meals (Edit/Delete)
@@ -217,7 +211,8 @@ def food_logging_page():
                         fat = col6.number_input("Fat", min_value=0.0, value=row["Fat"], step=0.1, key=f"fat_{idx}_{selected_date_str}")
 
                         if col7.button("💾 Save", key=save_key):
-                            st.session_state.meals_by_date[selected_date_str][idx] = {
+                            # Update session-state
+                            user_meals_by_date[selected_date_str][idx] = {
                                 "DateTime": row["DateTime"],
                                 "Date": selected_date_str,
                                 "MealType": m_type,
@@ -228,13 +223,14 @@ def food_logging_page():
                                 "Carbs": carbs,
                                 "Fat": fat
                             }
-                            updated_df = pd.DataFrame(st.session_state.meals_by_date[selected_date_str])
+                            # Write updated CSV
+                            updated_df = pd.DataFrame(user_meals_by_date[selected_date_str])
                             all_meals_df = read_meals_file()
                             all_meals_df = all_meals_df[all_meals_df["Date"] != selected_date_str]
                             all_meals_df = pd.concat([all_meals_df, updated_df], ignore_index=True)
                             write_meals_file(all_meals_df)
                             st.session_state[edit_key] = False
-                            st.experimental_rerun()
+                            st.rerun()
 
                     else:
                         col1, col2, col3, col4, col5, col6, col7 = st.columns([3,1,1,1,1,1,1])
@@ -247,13 +243,14 @@ def food_logging_page():
 
                         if col7.button("✏️ Edit", key=edit_key):
                             st.session_state[edit_key] = True
-                            st.experimental_rerun()
+                            st.rerun()
 
                         if col7.button("🗑️ Delete", key=delete_key):
-                            st.session_state.meals_by_date[selected_date_str].pop(idx)
-                            updated_df = pd.DataFrame(st.session_state.meals_by_date[selected_date_str])
+                            # Remove from session-state
+                            user_meals_by_date[selected_date_str].pop(idx)
+                            updated_df = pd.DataFrame(user_meals_by_date[selected_date_str])
                             all_meals_df = read_meals_file()
                             all_meals_df = all_meals_df[all_meals_df["Date"] != selected_date_str]
                             all_meals_df = pd.concat([all_meals_df, updated_df], ignore_index=True)
                             write_meals_file(all_meals_df)
-                            st.experimental_rerun()
+                            st.rerun()
