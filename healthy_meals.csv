@@ -1,0 +1,101 @@
+
+
+
+
+Meal,Category,Calories,Protein,Carbs,Fat
+Scrambled Eggs & Toast,Breakfast,350,18,25,12
+Oatmeal with Banana,Breakfast,320,10,50,5
+Greek Yogurt with Berries,Breakfast,300,15,35,5
+Avocado Toast,Breakfast,400,12,30,18
+Smoothie Bowl,Breakfast,380,12,55,6
+Turkey Sandwich,Lunch,450,28,40,12
+Chicken Salad,Lunch,400,30,20,15
+Quinoa & Veggie Bowl,Lunch,420,18,60,10
+Grilled Chicken Wrap,Lunch,500,35,45,15
+Tuna Salad Sandwich,Lunch,430,32,35,12
+Grilled Salmon & Veggies,Dinner,550,35,20,20
+Beef Stir-Fry with Rice,Dinner,600,38,50,18
+Lentil Curry with Rice,Dinner,500,25,60,15
+Baked Cod with Sweet Potato,Dinner,530,30,45,20
+Veggie Pasta with Pesto,Dinner,480,20,65,15
+Chicken & Quinoa Bowl,Dinner,570,40,50,18
+Shrimp & Veggie Stir-Fry,Dinner,500,35,40,15
+Turkey Meatballs with Zoodles,Dinner,550,38,30,20
+Vegetable Chili,Dinner,520,28,60,10
+Grilled Tofu & Veggies,Dinner,480,25,35,18
+Scrambled Eggs & Toast,Breakfast,350,18,25,12
+Oatmeal with Banana,Breakfast,320,10,50,5
+Greek Yogurt with Berries,Breakfast,300,15,35,5
+Avocado Toast,Breakfast,400,12,30,18
+Smoothie Bowl,Breakfast,380,12,55,6
+Masala Omelette,Breakfast,280,20,10,14
+Idli with Sambar,Breakfast,290,11,45,4
+Poha,Breakfast,260,5,40,6
+Upma,Breakfast,280,6,42,7
+Peanut Butter Toast,Breakfast,310,11,28,15
+Egg & Cheese Sandwich,Breakfast,420,22,32,18
+Protein Smoothie,Breakfast,350,28,25,7
+Breakfast Burrito,Breakfast,430,24,40,16
+Bagel with Cream Cheese,Breakfast,360,8,55,12
+Chia Pudding,Breakfast,260,8,28,10
+Waffles with Syrup,Breakfast,380,8,48,14
+
+Grilled Chicken Bowl,Lunch,560,40,55,16
+Chicken & Rice,Lunch,520,38,60,14
+Chicken Momo (8 pcs),Lunch,420,24,45,10
+Veg Momo (8 pcs),Lunch,350,12,48,7
+Chicken Wrap,Lunch,530,34,42,16
+Paneer Wrap,Lunch,520,20,45,18
+Chicken Caesar Salad,Lunch,470,38,18,20
+Veg Caesar Salad,Lunch,380,12,28,14
+Chicken Biryani,Lunch,750,32,70,30
+Veg Biryani,Lunch,640,16,72,22
+Paneer Curry & Rice,Lunch,640,24,68,20
+Chicken Curry & Rice,Lunch,650,36,60,22
+Dal Bhat,Nepali,700,22,95,10
+Rajma Chawal,Lunch,550,20,70,12
+Chana Masala & Rice,Lunch,520,18,68,8
+Tofu Rice Bowl,Lunch,450,26,50,12
+Shrimp Fried Rice,Lunch,680,32,78,18
+Paneer Rice Bowl,Lunch,560,20,65,15
+Chicken Shawarma Wrap,Lunch,590,32,45,22
+Falafel Wrap,Lunch,620,20,55,20
+Tuna Sandwich,Lunch,480,28,45,14
+Veggie Burger,Lunch,540,20,58,18
+Chicken Burger,Lunch,610,32,52,24
+Grilled Cheese Sandwich,Lunch,420,12,36,20
+Nepali Chowmein Chicken,Lunch,620,28,72,18
+Nepali Chowmein Veg,Lunch,560,12,78,10
+Thukpa Chicken,Lunch,540,28,62,12
+Thukpa Veg,Lunch,470,10,58,8
+Dal & Roti (2),Lunch,440,14,55,8
+Egg Curry & Rice,Lunch,580,22,62,16
+Chicken Teriyaki Bowl,Lunch,620,36,65,14
+Paneer Tikka,Lunch,400,24,18,20
+Chicken Tikka,Lunch,460,38,10,22
+Veg Stir Fry,Lunch,420,12,55,10
+Chicken Stir Fry,Lunch,520,34,45,16
+Pasta Alfredo Chicken,Dinner,820,34,68,38
+Pasta Red Sauce Veg,Dinner,650,16,75,18
+Pasta Pesto,Dinner,720,14,68,30
+Shrimp Pasta,Dinner,720,30,70,22
+Beef Stir Fry,Dinner,650,44,40,20
+Chicken Soup (Large),Dinner,380,28,22,10
+Lentil Soup,Dinner,240,16,32,4
+Egg Biryani,Dinner,680,24,65,22
+Fish Curry & Rice,Dinner,620,32,58,18
+Malai Kofta & Rice,Dinner,720,20,72,26
+Veg Curry & Rice,Dinner,520,10,68,12
+Beef Chili,Dinner,560,40,32,22
+Chicken Chili,Dinner,420,32,28,12
+Apple Snack,Snack,95,0,25,0
+Banana Snack,Snack,110,1,27,0
+Protein Bar,Snack,230,20,25,7
+Mixed Nuts (Small),Snack,180,6,8,15
+Greek Yogurt Cup,Snack,150,12,15,3
+Hummus & Crackers,Snack,250,8,28,10
+Granola Bar,Snack,190,4,24,6
+Boiled Eggs (2),Snack,150,12,2,10
+Paneer Cubes (100g),Snack,260,18,8,16
+Popcorn (Air Popped),Snack,120,3,22,2
+

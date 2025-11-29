@@ -102,7 +102,7 @@ def food_logging_page():
     if "meals_by_date" not in st.session_state:
         st.session_state.meals_by_date = {}
 
-    st.title("🍽️ Food Logging (Friendly USDA Dataset)")
+    st.title("🍽️ Food Logging")
     selected_date = st.date_input("Select a date to view/edit meals", value=date.today())
     selected_date_str = selected_date.strftime("%Y-%m-%d")
 
@@ -157,23 +157,37 @@ def food_logging_page():
     # Add Meal Button
     # ---------------------------
     if st.button("➕ Add Meal"):
-        if selected_meal is None:
-            st.warning("Please select a meal from the list.")
+        if not meal_input.strip():
+            st.warning("Please enter a meal name.")
         else:
+            # Use selected_meal for autofill or manual values
+            if selected_meal is not None:
+                meal_name = selected_meal["DisplayMeal"]
+                calories_val = calories
+                protein_val = protein
+                carbs_val = carbs
+                fat_val = fat
+            else:
+                meal_name = meal_input.strip().title()
+                calories_val = calories
+                protein_val = protein
+                carbs_val = carbs
+                fat_val = fat
+
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             row = {
                 "DateTime": timestamp,
                 "Date": selected_date_str,
                 "MealType": meal_type,
-                "Meal": selected_meal["DisplayMeal"],
+                "Meal": meal_name,
                 "Servings": float(servings),
-                "Calories": float(calories),
-                "Protein": float(protein),
-                "Carbs": float(carbs),
-                "Fat": float(fat)
+                "Calories": float(calories_val),
+                "Protein": float(protein_val),
+                "Carbs": float(carbs_val),
+                "Fat": float(fat_val)
             }
 
-            # Add to session
+            # Add to session-state
             user_meals_by_date.setdefault(selected_date_str, []).append(row)
 
             # Write to CSV
@@ -181,8 +195,10 @@ def food_logging_page():
             all_meals_df = pd.concat([all_meals_df, pd.DataFrame([row])], ignore_index=True)
             write_meals_file(all_meals_df)
 
-            st.success(f"{meal_type} - {selected_meal['DisplayMeal']} added!")
+            st.success(f"{meal_type} - {meal_name} added!")
             st.rerun()
+
+      
 
     # ---------------------------
     # Display Meals (Edit/Delete)
