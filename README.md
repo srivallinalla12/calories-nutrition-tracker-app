@@ -1,128 +1,130 @@
-# AI-Powered Calorie & Nutrition Tracker  
-*A simple student project created using Streamlit, Python, OpenAI API and basic data processing tools.
----
-## Overview
-This project lets users track their daily meals, monitor calories, and visualize macronutrients.  
-It also provides basic AI-generated suggestions personalized for each user.
----
-## Project Structure
-.
-├── Home.py
-├── main.py
-├── helpers.py
-├── requirements.txt
-├── USDA.csv
-├── healthy_meals.csv
-├── _pages/
-│ ├── _1_Food_Logging.py
-│ ├── _2_AI_Suggestions.py
-│ ├── 3_Visualization.py
-├── data/
-│ ├── users.json
-│ ├── meals.csv, sulav_meals.csv, daily_logs*.json
-│ ├── goal files
-└── README.md
----
-## Login System
-- Simple file-based login
-- Usernames are stored in `data/users.json`  
-- Each user gets their own meal history file  
-- Demo user is included for quick testing
----
-## Meal Logging
-Users can:
-- Log foods from:
-  - USDA Dataset
-  - Manual Entry
-- Track:
-  - Calories  
-  - Protein  
-  - Carbs  
-  - Fat  
-- All logs saved in `data/{username}_meals.csv`
+⭐ Nutrition & Calorie Tracking App (Streamlit)
+A personalized nutrition-tracking web application built with Python, Streamlit, and Pandas, featuring AI-powered meal suggestions, daily food logging, macro visualization, and user-specific data storage.
+Designed to help users track calories, improve diet habits, and receive targeted meal recommendations for weight loss, maintenance, or muscle gain.
+🚀 Features
+🔐 1. Secure Login & Session Management
+Each user gets a unique session using st.session_state["user"].
+Personalized meal logs are stored under the user’s own CSV file:
+data/<username>_meals.csv
+Demo user support included.
+🍽️ 2. Meal Logging System
+Users can log meals with the following details:
+Calories
+Protein
+Carbs
+Fat
+Date
+Real-time updates using st.rerun() for:
+Adding meals
+Editing meals
+Deleting meals
+Data stored dynamically in both:
+Session state
+User-specific CSV
+🤖 3. AI Meal Recommendations
+Smart meal suggestions powered by an AI model built around:
+Target calorie input
+User goal (Weight Loss / Maintenance / Weight Gain)
+Vegetarian / Non-Veg preference
+The AI provides balanced meal ideas based on:
+Calorie density
+Macro structure
+Weight-management strategy
+Examples:
+Weight Loss → high-protein, low-calorie meals
+Weight Gain → high-calorie, nutrient-dense meals
+Balanced → controlled macros matched to calorie target
+📊 4. Interactive Nutrition Visualization
+Users can view trends over time:
+Total Calories
+Protein Intake
+Carbs
+Fat
+Includes:
+Daily aggregation
+Clean data validation
+Dynamic Streamlit charts
+This helps users understand dietary patterns and adjust accordingly.
+🧱 5. Modular Application Architecture
+Clean project layout for scalability:
+📂 Project Root
+│── Home.py
+│── helpers.py
+│── main.py
+│── requirements.txt
+│── README.md
+│
+├── 📁 _pages/
+│     ├── _1_Food_Logging.py
+│     ├── _2_AI_Suggestions.py
+│     └── _3_Visualization.py
+│
+├── 📁 data/
+│     ├── meals.csv
+│     └── <username>_meals.csv
+│
 
----
-
-## AI Meal Suggestions
-The app uses **OpenAI API** for:
-- Healthy meal ideas  
-- Feedback based on the user's personal needs
-- Simple goal-based suggestions  
-
-This is **not a machine learning model**.  
-It is just making API calls to OpenAI.
----
-
-## Visualizations
-Users can get visual insights of:
-- Daily macro breakdown  
-- Calories over time  
-- Pie charts for macros & calories  
-- Stacked bar charts  
-- Cumulative macro timeline  
-- Horizontal macro proportion chart  
-
-Charts use **Matplotlib**.
----
-
-## How It Works
-- Users log meals  
-- Data is stored in CSV files  
-- Streamlit pages read and visualize the data  
-- AI suggestions are generated via API  
----
-
-## Installation
-
-### 1. Clone the project
-git clone https://github.com/srivallinalla12/calories-nutrition-tracker-app.git 
-cd calories-nutrition-tracker-app
-
-
-### 2. Install dependencies
+Each module handles a single responsibility
+Easy to extend with new features (e.g., progress reports, goals, APIs)
+🛠️ Tech Stack
+Component	Technology
+Frontend/UI	Streamlit
+Backend Logic	Python
+Data Storage	CSV (User-specific)
+AI Recommendation Engine	Rule-based + NLP model
+Libraries	Pandas, Streamlit, Numpy
+⚙️ Installation & Setup
+1. Clone the Repository
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
+2. Install Dependencies
 pip install -r requirements.txt
-
-### 3. Add your OpenAI API key
-To get AI-powered suggestions, create a `.env` file and add your key:
-
-OPENAI_API_KEY=your_api_key
-
-Note: If you don’t add a key, the app will still work for meal logging and visualization. Only the AI suggestions will be disabled. The OpenAI API key is not included here for security reasons. You’ll need to add your own key to use the AI features.
-
-### 4. Run the app
+3. Run the App
 streamlit run main.py
----
-
-## Demo User
-You can log in as:
-username: demo
-password: demo123
-
-This user loads sample data for quick testing.
----
-
-## Features (Summary)
-- Simple login  
-- Meal logging  
-- AI suggestions  
-- Daily calorie and macro visualization  
-- Week/Month/Year calorie graphs  
-
----
-
-## Contributors
-- **Gyanu Basnet**
-- **Sulav Bista**
-- **Srivalli Nalla** 
-
----
-
-## Notes
-This project is designed for learning and presentation purposes.  
-It is **not** intended for medical/health professional use.
----
-
-## License
-MIT License
-
-
+🧪 How It Works Internally
+Session State
+Stores logged-in user
+Tracks all meals for selected dates
+Stores edit modes & UI state
+CSV Storage
+App writes and reads user data in real time
+Auto-creates files for new users
+Ensures persistent logs between sessions
+AI System
+The AI uses:
+Calorie target
+Goal type
+Meal preference
+to generate structured nutritional recommendations.
+Example internal logic:
+if goal == "weight_loss":
+    recommend(high_protein, low_calorie)
+elif goal == "weight_gain":
+    recommend(calorie_dense, healthy_fats)
+else:
+    recommend(balanced_macros)
+🌟 Why This Project Stands Out
+✔ Full authentication + session management
+✔ Persistent storage without a database
+✔ Clean, modular structure ready for scale
+✔ AI-powered nutrition suggestions
+✔ Professional-grade UI/UX using Streamlit
+✔ Well-structured code suitable for real-world deployment
+Designed as a portfolio-quality project to showcase skills in:
+Backend Development
+Data Engineering
+AI Logic Design
+UI/UX with Streamlit
+State Management
+File-Based Data Architecture
+📌 Future Enhancements
+Integration with Fitness APIs (e.g., Fitbit, Google Fit)
+Cloud database (MongoDB or PostgreSQL)
+User goals dashboard
+Weekly progress reports
+Barcode scanning for food items
+Mobile-optimized layout
+👩‍💻 Author
+Srivalli Nalla
+Gyanu Basnet
+Sulav Bista
