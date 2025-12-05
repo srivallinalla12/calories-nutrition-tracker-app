@@ -72,6 +72,7 @@ Helps users understand dietary patterns and make informed adjustments.
 
 ### 📂 Project Structure
 📂 Project Root
+```
 │── Home.py
 │── helpers.py
 │── main.py
@@ -86,7 +87,7 @@ Helps users understand dietary patterns and make informed adjustments.
 ├── 📁 data/
 │ ├── meals.csv
 │ └── <username>_meals.csv
-
+```
 
 - Each module handles a **single responsibility**  
 - Easy to extend with new features (progress reports, APIs, goals, etc.)
@@ -107,62 +108,89 @@ Helps users understand dietary patterns and make informed adjustments.
 
 ## ⚙️ Installation & Setup
 
-### **1. Clone the Repository**
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
+git clone https://github.com/srivallinalla12/calories-nutrition-tracker-app.git
+```
+
+### 2. Install Dependencies
+```bash
 pip install -r requirements.txt
+```
+
+### 3. Run the App
+```bash
 streamlit run main.py
 ```
+
 ---
-###🧪 How It Works Internally
-Session State
--Stores logged-in user
--Tracks all meals for selected dates
--Manages UI states (edit mode, form visibility, etc.)
--CSV Storage
--User data saved in real time
--Auto-creates meal files for new users
--Ensures persistence between sessions
----
-###🤖AI System
+
+
+## 🧪 How It Works Internally
+
+### Session State
+- Stores logged-in user  
+- Tracks meals for selected dates  
+- Handles edit mode & page state  
+
+### CSV Storage
+- User data saved in real-time  
+- Auto-creates new user meal files  
+- Ensures persistent logs across sessions  
+
+### AI System
 The AI uses:
--Calorie target
--Goal type
--Meal preference to generate structured nutritional recommendations.
+- Calorie target  
+- Goal type  
+- Veg / Non-veg preference  
+
+to output structured meal recommendations.
+
+#### Example Logic:
+```python
+if goal == "weight_loss":
+    recommend(high_protein, low_calorie)
+elif goal == "weight_gain":
+    recommend(calorie_dense, healthy_fats)
+else:
+    recommend(balanced_macros)
+```
+
 ---
-**Example internal logic:**
-**if goal == "weight_loss":**
-    **recommend(high_protein, low_calorie)**
-**elif goal == "weight_gain":**
-    **recommend(calorie_dense, healthy_fats)**
-**else:**
-    **recommend(balanced_macros)**
+
+## 🌟 Why This Project Stands Out
+
+✔ Authentication + session management  
+✔ Persistent storage without a database  
+✔ Clean, scalable architecture  
+✔ AI-powered nutrition suggestions  
+✔ Professional Streamlit UI  
+✔ Perfect as a real portfolio project showcasing:
+
+- Backend logic  
+- Data engineering  
+- AI design  
+- UI/UX  
+- State management  
+- File-based architecture  
+
 ---
-###🌟 Why This Project Stands Out
--✔ Full authentication + session management
--✔ Persistent storage without a database
--✔ Clean, modular, scalable architecture
--✔ AI-powered nutrition suggestions
--✔ Professional UI/UX with Streamlit
--✔ Strong portfolio-quality project demonstrating:
+
+## 📌 Future Enhancements
+
+- Google Fit / Fitbit API integration  
+- MongoDB / PostgreSQL database support  
+- Progress dashboard with goals  
+- Weekly reports  
+- Food barcode scanning  
+- Mobile-responsive UI  
+
 ---
-###Backend development
--Data engineering
--AI-driven logic
--File-based data architecture
--Streamlit UI design
----
-###📌 Future Enhancements
--Integration with Fitbit / Google Fit APIs
--Cloud database support (MongoDB / PostgreSQL)
--Goal progress dashboard
--Weekly diet reports
--Barcode scanning for food items
--Mobile-responsive layout
----
-###👩‍💻 Authors
--Srivalli Nalla
--Gyanu Basnet
--Sulav Bista
+
+## 👩‍💻 Authors
+
+**Srivalli Nalla**  
+**Gyanu Basnet**  
+**Sulav Bista**
+
 ---
