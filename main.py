@@ -118,6 +118,7 @@ if st.session_state["user"] is None:
     st.title("🍎 Calorie & Nutrition Tracker")
     st.write("Please log in or sign up to continue.")
     st.info("Double click the Login button if it doesn't work first time.")
+    st.info("Demo User: ID: demo, PW: demo123")
 
     tab1, tab2 = st.tabs(["Login", "Sign Up"])
 
