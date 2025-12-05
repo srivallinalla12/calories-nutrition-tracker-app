@@ -114,6 +114,7 @@ cd <repo-name>
 pip install -r requirements.txt
 streamlit run main.py
 ```
+---
 ###🧪 How It Works Internally
 Session State
 -Stores logged-in user
@@ -123,13 +124,13 @@ Session State
 -User data saved in real time
 -Auto-creates meal files for new users
 -Ensures persistence between sessions
-
+---
 ###🤖AI System
 The AI uses:
 -Calorie target
 -Goal type
 -Meal preference to generate structured nutritional recommendations.
-
+---
 **Example internal logic:**
 **if goal == "weight_loss":**
     **recommend(high_protein, low_calorie)**
@@ -137,7 +138,7 @@ The AI uses:
     **recommend(calorie_dense, healthy_fats)**
 **else:**
     **recommend(balanced_macros)**
-    
+---
 ###🌟 Why This Project Stands Out
 -✔ Full authentication + session management
 -✔ Persistent storage without a database
@@ -145,13 +146,13 @@ The AI uses:
 -✔ AI-powered nutrition suggestions
 -✔ Professional UI/UX with Streamlit
 -✔ Strong portfolio-quality project demonstrating:
-
+---
 ###Backend development
 -Data engineering
 -AI-driven logic
 -File-based data architecture
 -Streamlit UI design
-
+---
 ###📌 Future Enhancements
 -Integration with Fitbit / Google Fit APIs
 -Cloud database support (MongoDB / PostgreSQL)
@@ -159,8 +160,9 @@ The AI uses:
 -Weekly diet reports
 -Barcode scanning for food items
 -Mobile-responsive layout
-
+---
 ###👩‍💻 Authors
 -Srivalli Nalla
 -Gyanu Basnet
 -Sulav Bista
+---
